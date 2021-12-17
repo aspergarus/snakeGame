@@ -152,8 +152,8 @@ function initConfig() {
 
 	if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
 		// Mobile
-		screenWidth = screen.availWidth;
-		screenHeight = screen.availHeight;
+		screenWidth = screen.availWidth * 2;
+		screenHeight = screen.availHeight * 2;
 	} else {
 		// Desktop
 		screenWidth = window.innerWidth;

@@ -12,7 +12,6 @@ html, body {
 }
 
 #game {
-	outline: 1px black solid;
 	position: absolute;
     top: 0;
     right: 0;
