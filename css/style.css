@@ -1,3 +1,22 @@
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: black;
+}
+
+.hidden {
+	display: none;
+}
+
 #game {
-	border: 1px black dashed;
+	outline: 1px black solid;
+	position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    margin: auto;
 }

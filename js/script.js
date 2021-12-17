@@ -1,14 +1,17 @@
-let size = 20;
-let width = 30;
-let height = 20;
+let field = {
+	width: 0,
+	height: 0,
+	widthElSize: 20,
+	background: "#2b2e32"
+};
 
 let snake = {
-	size: size,
+	size: 0,
 	x: 0,
 	y: 0,
 	length: 1,
-	colorHead: '#ff0000',
-	colorTail: '#6f3f3f',
+	colorHead: '#47ffe8',
+	colorTail: '#27dfc8',
 	direction: undefined,
 	body: [],
 	isDead: false,
@@ -17,14 +20,32 @@ let snake = {
 		return this.x === food.x && this.y === food.y;
 	},
 	isOut() {
-		return this.x < 0 || this.x >= width || this.y < 0 || this.y >= height;
+		return this.x < 0 || this.x >= field.width || this.y < 0 || this.y >= field.height;
 	},
 	occupiedCoord(x, y) {
+		for (let pos of this.body) {
+			if (pos.x === x && pos.y === y) {
+				return true;
+			}
+		}
+
 		return this.x === x || this.y === y;
 	},
+	randomFreeCell() {
+		let freeCells = [];
+
+		for (let x = 0; x < field.width; x++) {
+			for (let y = 0; y < field.height; y++) {
+				if (!snake.occupiedCoord(x, y)) {
+					freeCells.push({x, y});
+				}
+			}
+		}
+
+		return freeCells[getRandomInt(freeCells.length)];
+	},
 	fillAllField() {
-		// Check if snake has all cells of field
-		return this.length === width * height;
+		return this.length === field.width * field.height;
 	},
 	eatSelf() {
 		for (let pos of this.body) {
@@ -39,14 +60,24 @@ let snake = {
 let food = {
 	x: 0,
 	y: 0,
-	color: '#005500'
+	color: '#F77F7F'
 };
 
 let game = {
 	end: false,
 	win: false,
 	tick: 0,
-	tickRate: 250,
+	tickRate: 200,
+
+	run() {
+		clearInterval(this.tick);
+		this.tick = setInterval(this.process, this.tickRate);
+	},
+	process() {
+		makeMove();
+		checkEndGame();
+		draw();
+	}
 };
 
 let ctx;
@@ -64,7 +95,6 @@ function initkeyBoard() {
 		54: "right"
 	};
 
-	// document.addEventListener("touchmove", function(e) { console.log(e);});
 	document.addEventListener("touchstart", function(e) {
 		touch = e.changedTouches[0];
 	});
@@ -117,43 +147,42 @@ function fixDirection(prevDirection) {
 
 function initConfig() {
 	let canvas = document.getElementById("game");
-	canvas.width = width * snake.size;
-	canvas.height = height * snake.size;
+
+	let screenWidth, screenHeight;
+
+	if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+		// Mobile
+		screenWidth = screen.availWidth;
+		screenHeight = screen.availHeight;
+	} else {
+		// Desktop
+		screenWidth = window.innerWidth;
+		screenHeight = window.innerHeight;
+	}
+
+	snake.size = Math.floor(screenWidth / field.widthElSize);
+
+	canvas.width = screenWidth - screenWidth % snake.size;
+	canvas.height = screenHeight - screenHeight % snake.size;
+
+	field.width = canvas.width / snake.size;
+	field.height = canvas.height / snake.size;
 
 	ctx = canvas.getContext('2d');
 	ctx.width = canvas.width;
 	ctx.height = canvas.height;
-
-	document.getElementById("config_btn").addEventListener("click", function() {
-		snake.size = +document.getElementById("snake_size").value;
-		snake.colorHead = document.getElementById("color_head").value;
-		snake.colorTail = document.getElementById("color_tail").value;
-		snake.direction = undefined;
-
-		food.color = document.getElementById("color_food").value;
-		width = +document.getElementById("width").value;
-		height = +document.getElementById("height").value;
-
-		canvas.width = width * snake.size;
-		canvas.height = height * snake.size;
-		ctx = canvas.getContext('2d');
-		ctx.width = canvas.width;
-		ctx.height = canvas.height;
-		clearInterval(game.tick);
-
-		startGame();
-	});
+	snake.direction = undefined;
 }
 
 function makeFood() {
-	const unOccupiedField = getUnOccupiedField(snake);
-	food.x = unOccupiedField.x;
-	food.y = unOccupiedField.y;
+	const freeCell = snake.randomFreeCell();
+	food.x = freeCell.x;
+	food.y = freeCell.y;
 }
 
 function initField() {
-	snake.x = getRandomInt(width);
-	snake.y = getRandomInt(height);
+	snake.x = getRandomInt(field.width);
+	snake.y = getRandomInt(field.height);
 	makeFood();
 }
 
@@ -185,6 +214,7 @@ function makeMove() {
 	}
 
 	if (snake.isOut() || snake.eatSelf()) {
+		debugger;
 		snake.isDead = true;
 	}
 }
@@ -192,6 +222,7 @@ function makeMove() {
 function checkEndGame() {
 	game.end = false;
 	if (snake.isDead) {
+		debugger;
 		game.end = true;
 		game.win = false;
 	}
@@ -202,68 +233,48 @@ function checkEndGame() {
 	}
 
 	if (game.end) {
+		debugger;
 		snake.isDead = false;
 		snake.direction = '';
 		snake.body = [];
 		clearInterval(game.tick);
-		startGame();
+		initField();
+		game.run();
 	}
 }
 
-function startGame() {
-	initField();
-
-	game.tick = setInterval(function () {
-		ctx.clearRect(0, 0, ctx.width, ctx.height);
-		makeMove();
-		checkEndGame();
-		draw();
-	}, game.tickRate);
-}
-
 function draw() {
+	ctx.fillStyle = field.background;
+	ctx.fillRect(0, 0, ctx.width, ctx.height);
+
 	// Draw the head
 	ctx.fillStyle = snake.colorHead;
-	ctx.fillRect(snake.x * snake.size, snake.y * snake.size, snake.size, snake.size);
+	ctx.fillRect(snake.x * snake.size + 1, snake.y * snake.size + 1, snake.size - 1, snake.size - 1);
 
 	// Draw the tail
 	for (let snakeEl of snake.body) {
 		ctx.fillStyle = snake.colorTail;
-		ctx.fillRect(snakeEl.x * snake.size, snakeEl.y * snake.size, snake.size, snake.size);		
+		ctx.fillRect(snakeEl.x * snake.size + 1, snakeEl.y * snake.size + 1, snake.size - 1, snake.size - 1);
 	}
 
 	// Draw food
 	ctx.fillStyle = food.color;
-	ctx.fillRect(food.x * snake.size, food.y * snake.size, snake.size, snake.size);
+	ctx.fillRect(food.x * snake.size + 1, food.y * snake.size + 1, snake.size - 1, snake.size - 1);
 }
 
 function getRandomInt(max) {
 	return Math.floor(Math.random() * max);
 }
 
-function getUnOccupiedField(snake) {
-	let field = [];
-
-	for (let x = 0; x < width; x++) {
-		let row = [];
-		for (let y = 0; y < height; y++) {
-			if (!snake.occupiedCoord(x, y)) {
-				row.push(0);
-			}
-		}
-		field.push(row);
-	}
-
-	const x = getRandomInt(field.length);
-	const y = getRandomInt(field[x].length);
-
-	return {x, y};
+function run() {
+	initConfig();
+	initField();
+	game.run();
 }
 
 document.addEventListener("DOMContentLoaded", function() {
 	initkeyBoard();
-	initConfig();
-	initField();
-
-	startGame();
+	window.addEventListener("orientationchange", run);
+	
+	run();
 });
