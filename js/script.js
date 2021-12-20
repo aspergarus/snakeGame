@@ -243,7 +243,7 @@ function checkEndGame() {
 
 function draw() {
 	// Draw field
-	let rowN = 0, colN = 0;
+	let rowN = false, colN = false;
 	for (let x = 0; x < ctx.width; x += snake.size) {
 		for (let y = 0; y < ctx.height; y += snake.size) {
 			if (rowN == colN) {
@@ -252,9 +252,9 @@ function draw() {
 				ctx.fillStyle = field.background2;
 			}
 			ctx.fillRect(x, y, snake.size, snake.size);
-			rowN = 1 - rowN;
+			rowN = !rowN;
 		}
-		colN = 1 - colN;
+		colN = !colN;
 	}
 
 	// Draw the head
