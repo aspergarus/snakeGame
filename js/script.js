@@ -251,7 +251,6 @@ function draw() {
 			} else {
 				ctx.fillStyle = field.background2;
 			}
-			console.log(rowN, colN, ctx.fillStyle);
 			ctx.fillRect(x, y, snake.size, snake.size);
 			rowN = 1 - rowN;
 		}
