@@ -2,7 +2,8 @@ let field = {
 	width: 0,
 	height: 0,
 	widthElSize: 20,
-	background: "#2b2e32"
+	background:  "#2b2e32",
+	background2: "#3b3e42"
 };
 
 let snake = {
@@ -60,14 +61,14 @@ let snake = {
 let food = {
 	x: 0,
 	y: 0,
-	color: '#F77F7F'
+	color: 	'#F77F7F',
 };
 
 let game = {
 	end: false,
 	win: false,
 	tick: 0,
-	tickRate: 200,
+	tickRate: 500,
 
 	run() {
 		clearInterval(this.tick);
@@ -214,7 +215,6 @@ function makeMove() {
 	}
 
 	if (snake.isOut() || snake.eatSelf()) {
-		debugger;
 		snake.isDead = true;
 	}
 }
@@ -222,7 +222,6 @@ function makeMove() {
 function checkEndGame() {
 	game.end = false;
 	if (snake.isDead) {
-		debugger;
 		game.end = true;
 		game.win = false;
 	}
@@ -233,7 +232,6 @@ function checkEndGame() {
 	}
 
 	if (game.end) {
-		debugger;
 		snake.isDead = false;
 		snake.direction = '';
 		snake.body = [];
@@ -244,8 +242,21 @@ function checkEndGame() {
 }
 
 function draw() {
-	ctx.fillStyle = field.background;
-	ctx.fillRect(0, 0, ctx.width, ctx.height);
+	// Draw field
+	let rowN = 0, colN = 0;
+	for (let x = 0; x < ctx.width; x += snake.size) {
+		for (let y = 0; y < ctx.height; y += snake.size) {
+			if (rowN == colN) {
+				ctx.fillStyle = field.background;
+			} else {
+				ctx.fillStyle = field.background2;
+			}
+			console.log(rowN, colN, ctx.fillStyle);
+			ctx.fillRect(x, y, snake.size, snake.size);
+			rowN = 1 - rowN;
+		}
+		colN = 1 - colN;
+	}
 
 	// Draw the head
 	ctx.fillStyle = snake.colorHead;
